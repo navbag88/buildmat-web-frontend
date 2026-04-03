@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "maven", "jdk17"]
+
+[phases.install]
+cmds = [
+  "cd frontend && npm install",
+  "cd frontend && npm run build",
+  "cd backend && mvn clean package -DskipTests"
+]
+
+[start]
+cmd = "java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-railway} -jar backend/target/buildmat-web-1.0.0.jar"
