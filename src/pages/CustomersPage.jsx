@@ -48,10 +48,10 @@ export default function CustomersPage() {
           {customers.map(c => (
             <tr key={c.id} className="table-tr">
               <td className="table-td font-medium">{c.name}</td>
-              <td className="table-td">{c.phone || '—'}</td>
-              <td className="table-td">{c.email || '—'}</td>
-              <td className="table-td max-w-xs truncate">{c.address || '—'}</td>
-              <td className="table-td">
+              <td className="table-td text-center">{c.phone || '—'}</td>
+              <td className="table-td text-center">{c.email || '—'}</td>
+              <td className="table-td max-w-xs truncate text-center">{c.address || '—'}</td>
+              <td className="table-td text-center">
                 <div className="flex gap-2">
                   <button className="btn-secondary btn-sm" onClick={() => setModal(c)}>Edit</button>
                   <button className="btn-danger btn-sm" onClick={() => handleDelete(c)}>Delete</button>

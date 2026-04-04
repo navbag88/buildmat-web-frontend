@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { getUser, isAdmin, logout } from '../utils/auth'
+import { getUser, isAdmin, isSuperAdmin, logout } from '../utils/auth'
 import {
   LayoutDashboard, Users, Package, FileText, CreditCard,
   BarChart3, Shield, LogOut, Menu, X, ChevronDown, Building2, Settings
@@ -69,7 +69,9 @@ export default function Layout() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium text-white truncate">{user?.fullName}</div>
-            <div className="text-xs text-slate-400">{user?.role}</div>
+            <div className="text-xs text-slate-400">
+              {user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role === 'ADMIN' ? 'Admin' : 'User'}
+            </div>
           </div>
         </div>
         <button onClick={logout}

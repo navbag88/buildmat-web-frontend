@@ -17,7 +17,12 @@ export function useAuth() {
   const login = async (username, password) => {
     const res = await api.post('/auth/login', { username, password })
     localStorage.setItem('token', res.data.token)
-    localStorage.setItem('user', JSON.stringify(res.data.user))
+    localStorage.setItem('user', JSON.stringify({
+      id: res.data.id,
+      username: res.data.username,
+      fullName: res.data.fullName,
+      role: res.data.role,
+    }))
     return res.data
   }
   return { login, isAdmin: checkIsAdmin() }
@@ -25,6 +30,9 @@ export function useAuth() {
 
 const PrivateRoute = ({ children }) =>
   getToken() ? children : <Navigate to="/login" replace />
+
+const AdminRoute = ({ children }) =>
+  getToken() && checkIsAdmin() ? children : <Navigate to="/dashboard" replace />
 
 export default function App() {
   return (
@@ -40,8 +48,8 @@ export default function App() {
         <Route path="invoices/:id/edit"  element={<Invoices />} />
         <Route path="payments"   element={<Payments />} />
         <Route path="reports"    element={<Reports />} />
-        <Route path="users"      element={<Users />} />
-        <Route path="settings"   element={<Settings />} />
+        <Route path="users"      element={<AdminRoute><Users /></AdminRoute>} />
+        <Route path="settings"   element={<AdminRoute><Settings /></AdminRoute>} />
       </Route>
     </Routes>
   )

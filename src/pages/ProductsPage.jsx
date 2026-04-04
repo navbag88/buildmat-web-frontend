@@ -52,13 +52,13 @@ export default function ProductsPage() {
         <DataTable headers={['Name','Category','Unit','Price','SGST%','CGST%','Stock','Actions']} empty={products.length===0}>
           {products.map(p => (
             <tr key={p.id} className="table-tr">
-              <td className="table-td font-medium">{p.name}</td>
-              <td className="table-td text-gray-500">{p.category || '—'}</td>
-              <td className="table-td">{p.unit}</td>
-              <td className="table-td font-medium">{INR(p.price)}</td>
+              <td className="table-td font-medium ">{p.name}</td>
+              <td className="table-td text-gray-500 text-center">{p.category || '—'}</td>
+              <td className="table-td text-center">{p.unit}</td>
+              <td className="table-td font-medium text-center">{INR(p.price)}</td>
               <td className="table-td text-center">{p.sgstPercent}%</td>
               <td className="table-td text-center">{p.cgstPercent}%</td>
-              <td className="table-td">{stockBadge(p.stockQty)}</td>
+              <td className="table-td text-center" >{stockBadge(p.stockQty)}</td>
               <td className="table-td">
                 <div className="flex gap-2">
                   <button className="btn-secondary btn-sm" onClick={() => setModal(p)}>Edit</button>

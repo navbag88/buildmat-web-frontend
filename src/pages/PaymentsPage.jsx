@@ -41,13 +41,13 @@ export function PaymentsPage() {
         <DataTable headers={['Date','Invoice #','Customer','Amount','Method','Reference','Actions']} empty={payments.length===0}>
           {payments.map(p => (
             <tr key={p.id} className="table-tr">
-              <td className="table-td text-gray-500">{p.paymentDate}</td>
-              <td className="table-td font-medium text-blue-600">{p.invoiceNumber}</td>
-              <td className="table-td">{p.customerName||'—'}</td>
+              <td className="table-td text-gray-500 text-center">{p.paymentDate}</td>
+              <td className="table-td font-medium text-blue-600 text-center">{p.invoiceNumber}</td>
+              <td className="table-td text-center">{p.customerName||'—'}</td>
               <td className="table-td text-right font-semibold text-green-700">{INR(p.amount)}</td>
-              <td className="table-td">{methodBadge(p.method)}</td>
-              <td className="table-td text-gray-500">{p.reference||'—'}</td>
-              <td className="table-td">
+              <td className="table-td text-center">{methodBadge(p.method)}</td>
+              <td className="table-td text-gray-500 text-center">{p.reference||'—'}</td>
+              <td className="table-td text-center">
                 <button className="btn-danger btn-sm" onClick={() => handleDelete(p)}>Delete</button>
               </td>
             </tr>

@@ -105,8 +105,11 @@ export const reportsApi = {
 
 // ── Settings ───────────────────────────────────────────────────────
 export const settingsApi = {
-  get:    () => api.get('/settings'),
-  update: (data) => api.put('/settings', data),
+  get:        () => api.get('/settings'),
+  update:     (data) => api.put('/settings', data),
+  uploadLogo: (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/settings/logo', fd) },
+  removeLogo: () => api.delete('/settings/logo'),
+  getLogo:    () => api.get('/settings/logo', { responseType: 'blob' }),
 }
 
 // ── Users ──────────────────────────────────────────────────────────
