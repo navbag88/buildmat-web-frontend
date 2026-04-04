@@ -38,7 +38,11 @@ export default function ProductsPage() {
         <h1 className="page-title">Products & Inventory</h1>
         <div className="flex flex-wrap items-center gap-2">
           <SearchBar value={search} onChange={setSearch} placeholder="Search name or category..." />
-          <ImportButton onImport={f => productsApi.import(f).then(r => { load(); return r })} />
+          <ImportButton
+            onImport={f => productsApi.import(f).then(r => { load(); return r })}
+            onTemplate={productsApi.importTemplate}
+            templateFileName="products-import-template.xlsx"
+          />
           <ExportButtons onExcelExport={productsApi.exportExcel} onPdfExport={productsApi.exportPdf} />
           <button className="btn-primary" onClick={() => setModal(EMPTY)}>+ Add Product</button>
         </div>

@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { getUser, isAdmin, logout } from '../utils/auth'
 import {
   LayoutDashboard, Users, Package, FileText, CreditCard,
-  BarChart3, Shield, LogOut, Menu, X, ChevronDown, Building2
+  BarChart3, Shield, LogOut, Menu, X, ChevronDown, Building2, Settings
 } from 'lucide-react'
 
 const navItems = [
@@ -55,7 +55,8 @@ export default function Layout() {
         {isAdmin() && (
           <>
             <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mt-4 mb-2">Administration</p>
-            <NavItem to="/users" icon={Shield} label="Users" />
+            <NavItem to="/users"    icon={Shield}    label="Users" />
+            <NavItem to="/settings" icon={Settings}  label="Settings" />
           </>
         )}
       </nav>

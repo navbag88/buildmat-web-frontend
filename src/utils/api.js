@@ -45,26 +45,28 @@ export const dashboardApi = {
 
 // ── Customers ──────────────────────────────────────────────────────
 export const customersApi = {
-  getAll:      (q) => api.get('/customers', { params: q ? { q } : {} }),
-  getById:     (id) => api.get(`/customers/${id}`),
-  create:      (data) => api.post('/customers', data),
-  update:      (id, data) => api.put(`/customers/${id}`, data),
-  delete:      (id) => api.delete(`/customers/${id}`),
-  import:      (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/customers/import', fd) },
-  exportExcel: () => api.get('/customers/export/excel', { responseType: 'blob' }),
-  exportPdf:   () => api.get('/customers/export/pdf', { responseType: 'blob' }),
+  getAll:          (q) => api.get('/customers', { params: q ? { q } : {} }),
+  getById:         (id) => api.get(`/customers/${id}`),
+  create:          (data) => api.post('/customers', data),
+  update:          (id, data) => api.put(`/customers/${id}`, data),
+  delete:          (id) => api.delete(`/customers/${id}`),
+  import:          (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/customers/import', fd) },
+  importTemplate:  () => api.get('/customers/import/template', { responseType: 'blob' }),
+  exportExcel:     () => api.get('/customers/export/excel', { responseType: 'blob' }),
+  exportPdf:       () => api.get('/customers/export/pdf', { responseType: 'blob' }),
 }
 
 // ── Products ───────────────────────────────────────────────────────
 export const productsApi = {
-  getAll:      (q) => api.get('/products', { params: q ? { q } : {} }),
-  getById:     (id) => api.get(`/products/${id}`),
-  create:      (data) => api.post('/products', data),
-  update:      (id, data) => api.put(`/products/${id}`, data),
-  delete:      (id) => api.delete(`/products/${id}`),
-  import:      (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/products/import', fd) },
-  exportExcel: () => api.get('/products/export/excel', { responseType: 'blob' }),
-  exportPdf:   () => api.get('/products/export/pdf', { responseType: 'blob' }),
+  getAll:          (q) => api.get('/products', { params: q ? { q } : {} }),
+  getById:         (id) => api.get(`/products/${id}`),
+  create:          (data) => api.post('/products', data),
+  update:          (id, data) => api.put(`/products/${id}`, data),
+  delete:          (id) => api.delete(`/products/${id}`),
+  import:          (file) => { const fd = new FormData(); fd.append('file', file); return api.post('/products/import', fd) },
+  importTemplate:  () => api.get('/products/import/template', { responseType: 'blob' }),
+  exportExcel:     () => api.get('/products/export/excel', { responseType: 'blob' }),
+  exportPdf:       () => api.get('/products/export/pdf', { responseType: 'blob' }),
 }
 
 // ── Invoices ───────────────────────────────────────────────────────
@@ -99,6 +101,12 @@ export const reportsApi = {
   paymentCollection: (from, to) => api.get('/reports/payment-collection', { params: { from, to } }),
   exportExcel:       (type, params) => api.get(`/reports/${type}/export/excel`, { params, responseType: 'blob' }),
   exportPdf:         (type, params) => api.get(`/reports/${type}/export/pdf`, { params, responseType: 'blob' }),
+}
+
+// ── Settings ───────────────────────────────────────────────────────
+export const settingsApi = {
+  get:    () => api.get('/settings'),
+  update: (data) => api.put('/settings', data),
 }
 
 // ── Users ──────────────────────────────────────────────────────────

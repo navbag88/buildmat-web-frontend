@@ -33,7 +33,11 @@ export default function CustomersPage() {
         <h1 className="page-title">Customers</h1>
         <div className="flex flex-wrap items-center gap-2">
           <SearchBar value={search} onChange={setSearch} placeholder="Search name or phone..." />
-          <ImportButton onImport={f => customersApi.import(f).then(r => { load(); return r })} />
+          <ImportButton
+            onImport={f => customersApi.import(f).then(r => { load(); return r })}
+            onTemplate={customersApi.importTemplate}
+            templateFileName="customers-import-template.xlsx"
+          />
           <ExportButtons onExcelExport={customersApi.exportExcel} onPdfExport={customersApi.exportPdf} />
           <button className="btn-primary" onClick={() => setModal(EMPTY)}>+ Add Customer</button>
         </div>

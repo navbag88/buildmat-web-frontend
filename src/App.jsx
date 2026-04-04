@@ -11,6 +11,7 @@ import Invoices from './pages/InvoicesPage'
 import Payments from './pages/PaymentsPage'
 import Reports from './pages/ReportsPage'
 import Users from './pages/UsersPage'
+import Settings from './pages/SettingsPage'
 
 export function useAuth() {
   const login = async (username, password) => {
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="payments"   element={<Payments />} />
         <Route path="reports"    element={<Reports />} />
         <Route path="users"      element={<Users />} />
+        <Route path="settings"   element={<Settings />} />
       </Route>
     </Routes>
   )

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'react-hot-toast'
-import { invoicesApi, customersApi, productsApi, paymentsApi, INR, downloadBlob } from '../utils/api.js'
+import { invoicesApi, customersApi, productsApi, paymentsApi, settingsApi, INR, downloadBlob } from '../utils/api.js'
 import { Modal, Field, ExportButtons, SearchBar, DataTable, StatusBadge, Spinner, useConfirm } from '../components/Shared.jsx'
 
 export default function InvoicesPage() {
@@ -9,6 +9,7 @@ export default function InvoicesPage() {
   const [search, setSearch]     = useState('')
   const [modal, setModal]       = useState(null)  // null | 'new' | invoice
   const [payModal, setPayModal] = useState(null)  // invoice for payment
+  const [viewInv, setViewInv]   = useState(null)  // invoice to view/print
   const confirm = useConfirm()
 
   const load = useCallback(async () => {
@@ -60,6 +61,7 @@ export default function InvoicesPage() {
               <td className="table-td"><StatusBadge status={inv.status} /></td>
               <td className="table-td">
                 <div className="flex gap-1.5">
+                  <button className="btn-secondary btn-sm text-blue-600" onClick={() => setViewInv(inv)} title="View Invoice">👁</button>
                   <button className="btn-secondary btn-sm" onClick={() => setModal(inv)}>✏</button>
                   <button className="btn-secondary btn-sm text-purple-600" onClick={() => handleDownloadPdf(inv)} title="Download PDF">📄</button>
                   {inv.status !== 'PAID' && <button className="btn-success btn-sm" onClick={() => setPayModal(inv)}>Pay</button>}
@@ -78,6 +80,9 @@ export default function InvoicesPage() {
       {payModal && (
         <PaymentModal invoice={payModal} onClose={() => setPayModal(null)}
           onSaved={() => { setPayModal(null); load() }} />
+      )}
+      {viewInv && (
+        <InvoiceViewModal invoice={viewInv} onClose={() => setViewInv(null)} />
       )}
     </div>
   )
@@ -235,6 +240,189 @@ function InvoiceModal({ invoice, onClose, onSaved }) {
         </div>
       </form>
     </Modal>
+  )
+}
+
+// ── Invoice View / Print Modal ─────────────────────────────────────────────────
+function InvoiceViewModal({ invoice, onClose }) {
+  const [detail, setDetail]     = useState(null)
+  const [settings, setSettings] = useState({})
+  const printRef = useRef()
+
+  useEffect(() => {
+    Promise.all([
+      invoicesApi.getById(invoice.id),
+      settingsApi.get(),
+    ]).then(([inv, cfg]) => {
+      setDetail(inv.data)
+      setSettings(cfg.data)
+    }).catch(() => toast.error('Failed to load invoice details'))
+  }, [invoice.id])
+
+  const handlePrint = () => {
+    const content = printRef.current.innerHTML
+    const html = `<!DOCTYPE html><html><head>
+      <title>Invoice ${invoice.invoiceNumber}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 13px; color: #1a2332; background: white; padding: 32px; }
+        hr { border: none; border-top: 1.5px solid #e5e7eb; margin: 10px 0; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        thead tr { background: #2563eb; color: white; }
+        thead th { padding: 7px 8px; font-size: 11px; text-align: left; }
+        tbody tr:nth-child(even) { background: #eff6ff; }
+        tbody tr:nth-child(odd)  { background: white; }
+        tbody td { padding: 6px 8px; font-size: 12px; }
+        @media print { body { padding: 16px; } }
+      </style>
+      </head><body>${content}</body></html>`
+    const blob = new Blob([html], { type: 'text/html' })
+    const url  = URL.createObjectURL(blob)
+    const win  = window.open(url, '_blank', 'width=900,height=700')
+    win.addEventListener('load', () => {
+      win.focus(); win.print()
+      URL.revokeObjectURL(url)
+    })
+  }
+
+  if (!detail) return (
+    <div className="modal-overlay">
+      <div className="modal flex items-center justify-center p-12"><Spinner /></div>
+    </div>
+  )
+
+  const bizName   = settings.businessName || 'My Business'
+  const tagLine   = settings.tagLine   || ''
+  const gstNumber = settings.gstNumber || ''
+  const phone     = settings.phone     || ''
+  const email     = settings.email     || ''
+
+  const subLine = [tagLine, gstNumber ? `GST No: ${gstNumber}` : ''].filter(Boolean).join(' | ')
+  const contactLine = [phone ? `Ph: ${phone}` : '', email].filter(Boolean).join(' | ')
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal modal-lg" style={{ maxWidth: 780 }}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-bold text-gray-900">Invoice — {detail.invoiceNumber}</h2>
+          <div className="flex gap-2 items-center">
+            <button onClick={handlePrint} className="btn-primary btn-sm flex items-center gap-1.5">🖨 Print</button>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+          </div>
+        </div>
+
+        <div className="p-6 overflow-y-auto" style={{ maxHeight: '80vh' }}>
+          <div ref={printRef}>
+            {/* Header */}
+            <div className="inv-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:16 }}>
+              <div>
+                <div className="biz-name" style={{ fontSize:22, fontWeight:'bold', color:'#2563eb' }}>{bizName}</div>
+                {subLine     && <div className="biz-sub" style={{ fontSize:11, color:'#6b7280', marginTop:2 }}>{subLine}</div>}
+                {contactLine && <div className="biz-sub" style={{ fontSize:11, color:'#6b7280', marginTop:1 }}>{contactLine}</div>}
+              </div>
+              <div style={{ textAlign:'right' }}>
+                <div style={{ fontSize:22, fontWeight:'bold', color:'#1a2332' }}>TAX INVOICE</div>
+                <div style={{ fontSize:14, fontWeight:'bold', color:'#2563eb' }}>{detail.invoiceNumber}</div>
+                <div style={{ fontSize:11, color:'#6b7280', marginTop:2 }}>Date: {detail.invoiceDate}</div>
+                {detail.dueDate && <div style={{ fontSize:11, color:'#6b7280' }}>Due: {detail.dueDate}</div>}
+                <span className={`status-badge ${detail.status}`} style={{ display:'inline-block', padding:'2px 10px', borderRadius:9999, fontSize:11, fontWeight:'bold', marginTop:4,
+                  background: detail.status==='PAID'?'#dcfce7': detail.status==='PARTIAL'?'#fef9c3':'#fee2e2',
+                  color: detail.status==='PAID'?'#166534': detail.status==='PARTIAL'?'#92400e':'#991b1b' }}>
+                  {detail.status}
+                </span>
+              </div>
+            </div>
+
+            <hr style={{ border:'none', borderTop:'1.5px solid #e5e7eb', margin:'10px 0' }} />
+
+            {/* Bill To */}
+            {detail.customerName && (
+              <div style={{ background:'#eff6ff', padding:'12px 16px', borderRadius:6, display:'inline-block', minWidth:240, marginBottom:16 }}>
+                <div style={{ fontSize:10, fontWeight:'bold', color:'#2563eb', textTransform:'uppercase' }}>Bill To</div>
+                <div style={{ fontSize:15, fontWeight:'bold', color:'#1a2332', marginTop:2 }}>{detail.customerName}</div>
+              </div>
+            )}
+
+            {/* Items table */}
+            <table style={{ width:'100%', borderCollapse:'collapse', marginBottom:16 }}>
+              <thead>
+                <tr style={{ background:'#2563eb', color:'white' }}>
+                  <th style={{ padding:'7px 8px', fontSize:11, textAlign:'left' }}>#</th>
+                  <th style={{ padding:'7px 8px', fontSize:11, textAlign:'left' }}>Description</th>
+                  <th style={{ padding:'7px 8px', fontSize:11, textAlign:'left' }}>Unit</th>
+                  <th style={{ padding:'7px 8px', fontSize:11, textAlign:'right' }}>Qty</th>
+                  <th style={{ padding:'7px 8px', fontSize:11, textAlign:'right' }}>Unit Price</th>
+                  {detail.includeGst && <>
+                    <th style={{ padding:'7px 8px', fontSize:11, textAlign:'center' }}>SGST%</th>
+                    <th style={{ padding:'7px 8px', fontSize:11, textAlign:'center' }}>CGST%</th>
+                    <th style={{ padding:'7px 8px', fontSize:11, textAlign:'right' }}>GST Amt</th>
+                  </>}
+                  <th style={{ padding:'7px 8px', fontSize:11, textAlign:'right' }}>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(detail.items || []).map((it, i) => {
+                  const gstAmt = it.total * (it.sgstPercent + it.cgstPercent) / 100
+                  return (
+                    <tr key={i} style={{ background: i%2===0 ? '#eff6ff' : 'white' }}>
+                      <td style={{ padding:'6px 8px', fontSize:12 }}>{i+1}</td>
+                      <td style={{ padding:'6px 8px', fontSize:12 }}>{it.productName}</td>
+                      <td style={{ padding:'6px 8px', fontSize:12, color:'#6b7280' }}>{it.unit}</td>
+                      <td style={{ padding:'6px 8px', fontSize:12, textAlign:'right' }}>{it.quantity}</td>
+                      <td style={{ padding:'6px 8px', fontSize:12, textAlign:'right' }}>{INR(it.unitPrice)}</td>
+                      {detail.includeGst && <>
+                        <td style={{ padding:'6px 8px', fontSize:12, textAlign:'center' }}>{it.sgstPercent}%</td>
+                        <td style={{ padding:'6px 8px', fontSize:12, textAlign:'center' }}>{it.cgstPercent}%</td>
+                        <td style={{ padding:'6px 8px', fontSize:12, textAlign:'right' }}>{INR(gstAmt)}</td>
+                      </>}
+                      <td style={{ padding:'6px 8px', fontSize:12, textAlign:'right', fontWeight:'600' }}>{INR(it.total)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+
+            {/* Totals */}
+            <div style={{ display:'flex', justifyContent:'flex-end' }}>
+              <div style={{ minWidth:280, border:'1px solid #e5e7eb', borderRadius:4, overflow:'hidden' }}>
+                <TotRow label="Subtotal" value={INR(detail.subtotal)} />
+                {detail.includeGst && <>
+                  <TotRow label="SGST" value={INR(detail.sgstAmount)} />
+                  <TotRow label="CGST" value={INR(detail.cgstAmount)} />
+                  <TotRow label="Total GST" value={INR(detail.taxAmount)} />
+                </>}
+                <TotRow label="Grand Total" value={INR(detail.totalAmount)} grand />
+                <TotRow label="Paid" value={INR(detail.paidAmount)} />
+                <TotRow label="Balance Due" value={INR(detail.balanceDue)} />
+              </div>
+            </div>
+
+            {/* Notes */}
+            {detail.notes && (
+              <div style={{ marginTop:12, padding:'8px 12px', background:'#f9fafb', borderRadius:4, fontSize:11, color:'#4b5563' }}>
+                <strong>Notes:</strong> {detail.notes}
+              </div>
+            )}
+
+            <div style={{ marginTop:20, textAlign:'center', fontSize:10, color:'#9ca3af', borderTop:'0.5px solid #e5e7eb', paddingTop:8 }}>
+              Thank you for your business with {bizName}! This is a computer-generated invoice.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TotRow({ label, value, grand }) {
+  return (
+    <div style={{ display:'flex', justifyContent:'space-between', padding: grand ? '10px 12px' : '6px 12px',
+      background: grand ? '#2563eb' : 'white',
+      color: grand ? 'white' : '#1a2332',
+      fontWeight: grand ? 'bold' : 'normal',
+      fontSize: grand ? 14 : 12 }}>
+      <span>{label}</span><span>{value}</span>
+    </div>
   )
 }
 

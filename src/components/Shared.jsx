@@ -58,9 +58,10 @@ export function ExportButtons({ onExcelExport, onPdfExport }) {
 }
 
 // ── Import Button ──────────────────────────────────────────────────────────────
-export function ImportButton({ onImport }) {
+export function ImportButton({ onImport, onTemplate, templateFileName = 'import-template.xlsx' }) {
   const ref = useRef()
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading]   = React.useState(false)
+  const [tplLoad, setTplLoad]   = React.useState(false)
 
   const handle = async (e) => {
     const file = e.target.files?.[0]; if (!file) return
@@ -73,14 +74,31 @@ export function ImportButton({ onImport }) {
     finally { setLoading(false); ref.current.value = '' }
   }
 
+  const handleTemplate = async () => {
+    setTplLoad(true)
+    try {
+      const res = await onTemplate()
+      downloadBlob(res.data, templateFileName)
+      toast.success('Template downloaded!')
+    } catch { toast.error('Template download failed') }
+    finally { setTplLoad(false) }
+  }
+
   return (
-    <>
+    <div className="flex gap-1">
+      {onTemplate && (
+        <button onClick={handleTemplate} disabled={tplLoad}
+          className="btn-secondary btn-sm flex items-center gap-1.5 text-teal-700 hover:bg-teal-50"
+          title="Download import template">
+          ⬇ {tplLoad ? '...' : 'Template'}
+        </button>
+      )}
       <button onClick={() => ref.current.click()} disabled={loading}
         className="btn-success btn-sm flex items-center gap-1.5">
         ⬆ {loading ? 'Importing...' : 'Import Excel'}
       </button>
       <input ref={ref} type="file" accept=".xlsx" className="hidden" onChange={handle} />
-    </>
+    </div>
   )
 }
 
