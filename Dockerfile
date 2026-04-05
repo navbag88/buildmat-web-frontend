@@ -7,8 +7,10 @@ COPY . .
 RUN npm run build
 
 # ── Stage 2: Serve ──────────────────────────────────────────────────────────────
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+FROM node:20-alpine
+# # Install dependencies
+RUN npm install -g npm@latest
+RUN npm install -g serve
+COPY --from=build /app/dist usr/src/buildmat-frontend/build
+CMD ["serve", "-s", "usr/src/buildmat-frontend/build", "-l", "tcp://0.0.0.0:3000"]
+EXPOSE 3000
