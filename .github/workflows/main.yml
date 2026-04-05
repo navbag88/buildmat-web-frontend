@@ -105,6 +105,6 @@ jobs:
             docker run -d \
               --name buildmat-frontend \
               --restart unless-stopped \
-              -p 5173:5173 \
+              -p 3000:80 \
               ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
             echo "Frontend deployment successful!"
