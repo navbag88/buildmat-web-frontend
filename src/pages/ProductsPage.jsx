@@ -104,13 +104,13 @@ function ProductModal({ product, onClose, onSaved }) {
           <Field label="Category"><input className="input" value={form.category||''} onChange={e => set('category', e.target.value)} /></Field>
           <Field label="Unit" required><input className="input" value={form.unit||''} onChange={e => set('unit', e.target.value)} placeholder="Bag, Kg, Piece..." required /></Field>
           <Field label="Price per Unit" required><input className="input" type="number" step="0.01" value={form.price||''} onChange={e => set('price', e.target.value)} required /></Field>
-          <Field label="Stock Quantity"><input className="input" type="number" step="0.01" value={form.stockQty||0} onChange={e => set('stockQty', e.target.value)} /></Field>
+          <Field label="Stock Quantity"><input className="input" type="number" step="1" value={form.stockQty||''} onChange={e => set('stockQty', e.target.value)} /></Field>
         </div>
         <div className="border-t pt-4">
           <p className="text-sm font-semibold text-blue-700 mb-3">GST Configuration</p>
           <div className="grid grid-cols-3 gap-4">
-            <Field label="SGST %"><input className="input" type="number" step="0.5" min="0" value={form.sgstPercent||0} onChange={e => set('sgstPercent', e.target.value)} /></Field>
-            <Field label="CGST %"><input className="input" type="number" step="0.5" min="0" value={form.cgstPercent||0} onChange={e => set('cgstPercent', e.target.value)} /></Field>
+            <Field label="SGST %"><input className="input" type="number" step="1" min="0" value={form.sgstPercent||''} onChange={e => set('sgstPercent', e.target.value)} /></Field>
+            <Field label="CGST %"><input className="input" type="number" step="1" min="0" value={form.cgstPercent||''} onChange={e => set('cgstPercent', e.target.value)} /></Field>
             <div className="flex items-end pb-0.5">
               <div className="bg-blue-50 rounded-lg px-3 py-2 text-sm font-bold text-blue-700 w-full text-center">
                 Total: {(Number(form.sgstPercent||0)+Number(form.cgstPercent||0))}%

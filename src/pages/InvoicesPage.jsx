@@ -261,6 +261,7 @@ function InvoiceViewModal({ invoice, onClose }) {
 
   const handlePrint = () => {
     const content = printRef.current.innerHTML
+    console.log(content)
     const html = `<!DOCTYPE html><html><head>
       <title>Invoice ${invoice.invoiceNumber}</title>
       <style>
@@ -276,7 +277,7 @@ function InvoiceViewModal({ invoice, onClose }) {
         @media print { body { padding: 16px; } }
       </style>
       </head><body>${content}</body></html>`
-    const blob = new Blob([html], { type: 'text/html' })
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
     const url  = URL.createObjectURL(blob)
     const win  = window.open(url, '_blank', 'width=900,height=700')
     win.addEventListener('load', () => {
@@ -321,7 +322,7 @@ function InvoiceViewModal({ invoice, onClose }) {
                 {contactLine && <div className="biz-sub" style={{ fontSize:11, color:'#6b7280', marginTop:1 }}>{contactLine}</div>}
               </div>
               <div style={{ textAlign:'right' }}>
-                <div style={{ fontSize:22, fontWeight:'bold', color:'#1a2332' }}>TAX INVOICE</div>
+                <div style={{ fontSize:22, fontWeight:'bold', color:'#1a2332' }}>INVOICE</div>
                 <div style={{ fontSize:14, fontWeight:'bold', color:'#2563eb' }}>{detail.invoiceNumber}</div>
                 <div style={{ fontSize:11, color:'#6b7280', marginTop:2 }}>Date: {detail.invoiceDate}</div>
                 {detail.dueDate && <div style={{ fontSize:11, color:'#6b7280' }}>Due: {detail.dueDate}</div>}

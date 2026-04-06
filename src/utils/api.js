@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: 'http://159.65.152.128:8080/api' })
+const api = axios.create({ baseURL: 'http://localhost:8080/api', responseEncoding: 'utf8' })
 
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('token')
@@ -32,7 +32,9 @@ export const inr = INR
 export const fmtDate = d => d ? new Date(d).toLocaleDateString('en-IN') : '—'
 
 export function downloadBlob(data, filename) {
-  const url = URL.createObjectURL(new Blob([data]))
+  const isBlob = data instanceof Blob
+  const blob = isBlob ? data : new Blob([data], { type: 'application/octet-stream;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url; a.download = filename; a.click()
   URL.revokeObjectURL(url)

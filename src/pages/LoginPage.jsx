@@ -69,7 +69,6 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p className="text-center text-gray-400 text-xs mt-6">Super Admin: superadmin / superadmin123 &nbsp;|&nbsp; Admin: admin / admin123</p>
           </div>
         </div>
       </div>
