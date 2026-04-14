@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { getToken, isAdmin as checkIsAdmin } from './utils/auth'
+import { getUser, isAdmin as checkIsAdmin } from './utils/auth'
 import api from './utils/api'
 import Layout from './components/Layout'
 import Login from './pages/LoginPage'
@@ -16,7 +16,7 @@ import Settings from './pages/SettingsPage'
 export function useAuth() {
   const login = async (username, password) => {
     const res = await api.post('/auth/login', { username, password })
-    localStorage.setItem('token', res.data.token)
+    // Server sets the HTTP-only session cookie; we store only display metadata here.
     localStorage.setItem('user', JSON.stringify({
       id: res.data.id,
       username: res.data.username,
@@ -28,11 +28,13 @@ export function useAuth() {
   return { login, isAdmin: checkIsAdmin() }
 }
 
+// Auth is ultimately enforced by the server-side session cookie.
+// getUser() just prevents a flash of protected UI before the first API call returns 401.
 const PrivateRoute = ({ children }) =>
-  getToken() ? children : <Navigate to="/login" replace />
+  getUser() ? children : <Navigate to="/login" replace />
 
 const AdminRoute = ({ children }) =>
-  getToken() && checkIsAdmin() ? children : <Navigate to="/dashboard" replace />
+  getUser() && checkIsAdmin() ? children : <Navigate to="/dashboard" replace />
 
 export default function App() {
   return (

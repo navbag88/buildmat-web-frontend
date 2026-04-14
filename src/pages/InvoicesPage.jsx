@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'react-hot-toast'
 import { invoicesApi, customersApi, productsApi, paymentsApi, settingsApi, INR, downloadBlob } from '../utils/api.js'
 import { Modal, Field, ExportButtons, SearchBar, DataTable, StatusBadge, Spinner, useConfirm } from '../components/Shared.jsx'
+import { isSuperAdmin } from '../utils/auth.js'
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState([])
@@ -65,7 +66,7 @@ export default function InvoicesPage() {
                   <button className="btn-secondary btn-sm" onClick={() => setModal(inv)}>✏</button>
                   <button className="btn-secondary btn-sm text-purple-600" onClick={() => handleDownloadPdf(inv)} title="Download PDF">📄</button>
                   {inv.status !== 'PAID' && <button className="btn-success btn-sm" onClick={() => setPayModal(inv)}>Pay</button>}
-                  <button className="btn-danger btn-sm" onClick={() => handleDelete(inv)}>✕</button>
+                  {isSuperAdmin() && <button className="btn-danger btn-sm" onClick={() => handleDelete(inv)}>✕</button>}
                 </div>
               </td>
             </tr>

@@ -1,18 +1,25 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: 'http://159.65.152.128:8080/api', responseEncoding: 'utf8' })
-
-api.interceptors.request.use(cfg => {
-  const token = localStorage.getItem('token')
-  if (token) cfg.headers.Authorization = `Bearer ${token}`
-  return cfg
+// In production the frontend calls through the gateway.
+// Set VITE_API_BASE_URL env var to your gateway URL, e.g.:
+//   http://localhost:8090/api   (local dev via gateway)
+//   http://localhost:8080/api   (local dev direct to backend)
+//   https://gateway.railway.app/api  (production)
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090/api',
+  responseEncoding: 'utf8',
+  // withCredentials MUST be true so the browser sends the HTTP-only session cookie
+  // with every request (cross-origin included).
+  withCredentials: true,
 })
+
+// No request interceptor needed — the browser attaches the session cookie automatically.
 
 api.interceptors.response.use(
   r => r,
   err => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('token')
+      // Session expired or invalidated server-side; clear local user metadata and go to login.
       localStorage.removeItem('user')
       window.location.href = '/login'
     }
@@ -40,12 +47,12 @@ export function downloadBlob(data, filename) {
   URL.revokeObjectURL(url)
 }
 
-// ── Dashboard ──────────────────────────────────────────────────────
+// ── Dashboard ──────────────────────────────────────────────────────────────────
 export const dashboardApi = {
   stats: () => api.get('/dashboard/stats'),
 }
 
-// ── Customers ──────────────────────────────────────────────────────
+// ── Customers ──────────────────────────────────────────────────────────────────
 export const customersApi = {
   getAll:          (q) => api.get('/customers', { params: q ? { q } : {} }),
   getById:         (id) => api.get(`/customers/${id}`),
@@ -58,7 +65,7 @@ export const customersApi = {
   exportPdf:       () => api.get('/customers/export/pdf', { responseType: 'blob' }),
 }
 
-// ── Products ───────────────────────────────────────────────────────
+// ── Products ───────────────────────────────────────────────────────────────────
 export const productsApi = {
   getAll:          (q) => api.get('/products', { params: q ? { q } : {} }),
   getById:         (id) => api.get(`/products/${id}`),
@@ -71,7 +78,7 @@ export const productsApi = {
   exportPdf:       () => api.get('/products/export/pdf', { responseType: 'blob' }),
 }
 
-// ── Invoices ───────────────────────────────────────────────────────
+// ── Invoices ───────────────────────────────────────────────────────────────────
 export const invoicesApi = {
   getAll:      (q) => api.get('/invoices', { params: q ? { q } : {} }),
   getById:     (id) => api.get(`/invoices/${id}`),
@@ -83,7 +90,7 @@ export const invoicesApi = {
   exportPdf:   () => api.get('/invoices/export/pdf', { responseType: 'blob' }),
 }
 
-// ── Payments ───────────────────────────────────────────────────────
+// ── Payments ───────────────────────────────────────────────────────────────────
 export const paymentsApi = {
   getAll:      () => api.get('/payments'),
   byInvoice:   (invoiceId) => api.get(`/payments/invoice/${invoiceId}`),
@@ -93,7 +100,7 @@ export const paymentsApi = {
   exportPdf:   () => api.get('/payments/export/pdf', { responseType: 'blob' }),
 }
 
-// ── Reports ────────────────────────────────────────────────────────
+// ── Reports ────────────────────────────────────────────────────────────────────
 export const reportsApi = {
   salesSummary:      (from, to) => api.get('/reports/sales-summary', { params: { from, to } }),
   outstanding:       (asOf) => api.get('/reports/outstanding', { params: { asOf } }),
@@ -105,7 +112,7 @@ export const reportsApi = {
   exportPdf:         (type, params) => api.get(`/reports/${type}/export/pdf`, { params, responseType: 'blob' }),
 }
 
-// ── Settings ───────────────────────────────────────────────────────
+// ── Settings ───────────────────────────────────────────────────────────────────
 export const settingsApi = {
   get:        () => api.get('/settings'),
   update:     (data) => api.put('/settings', data),
@@ -114,7 +121,7 @@ export const settingsApi = {
   getLogo:    () => api.get('/settings/logo', { responseType: 'blob' }),
 }
 
-// ── Users ──────────────────────────────────────────────────────────
+// ── Users ──────────────────────────────────────────────────────────────────────
 export const usersApi = {
   getAll:         () => api.get('/users'),
   create:         (data) => api.post('/users', data),

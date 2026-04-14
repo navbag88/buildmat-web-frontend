@@ -2,13 +2,15 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../App.jsx'
 import { toast } from 'react-hot-toast'
+import { settingsApi } from '../utils/api.js'
 
 export default function LoginPage() {
   const { login } = useAuth()
-  const navigate = useNavigate()
-  const [form, setForm] = useState({ username: '', password: '' })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const navigate   = useNavigate()
+  const [form, setForm]           = useState({ username: '', password: '' })
+  const [loading, setLoading]     = useState(false)
+  const [error, setError]         = useState('')
+  const [showForgot, setShowForgot] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -58,7 +60,13 @@ export default function LoginPage() {
                   onChange={e => setForm(f => ({...f, username: e.target.value}))} required />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-semibold text-gray-700">Password</label>
+                  <button type="button" onClick={() => setShowForgot(true)}
+                    className="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                    Forgot password?
+                  </button>
+                </div>
                 <input className="input" type="password" placeholder="Enter password" value={form.password}
                   onChange={e => setForm(f => ({...f, password: e.target.value}))} required />
               </div>
@@ -68,9 +76,124 @@ export default function LoginPage() {
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
             </form>
-
           </div>
         </div>
+      </div>
+
+      {showForgot && <ForgotPasswordModal onClose={() => setShowForgot(false)} />}
+    </div>
+  )
+}
+
+function ForgotPasswordModal({ onClose }) {
+  const [username, setUsername]   = useState('')
+  const [step, setStep]           = useState('form')   // 'form' | 'info'
+  const [contactInfo, setContact] = useState(null)
+  const [loading, setLoading]     = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!username.trim()) return
+    setLoading(true)
+    try {
+      // Fetch admin contact info from the public settings endpoint
+      const res = await settingsApi.get()
+      const s   = res.data
+      setContact({
+        businessName: s.businessName,
+        phone:        s.phone,
+        email:        s.email,
+      })
+      setStep('info')
+    } catch {
+      // Even if settings fetch fails, still show the generic message
+      setContact(null)
+      setStep('info')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-7">
+        {step === 'form' ? (
+          <>
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Forgot Password</h3>
+                <p className="text-sm text-gray-500 mt-1">Enter your username to get help</p>
+              </div>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Username</label>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  autoFocus
+                  required
+                />
+              </div>
+              <button type="submit" disabled={loading}
+                className="w-full btn-primary py-2.5 text-sm font-semibold">
+                {loading ? 'Please wait...' : 'Continue'}
+              </button>
+            </form>
+
+            <button onClick={onClose} className="w-full text-center text-sm text-gray-400 hover:text-gray-600 mt-4">
+              Back to Sign In
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="flex items-start justify-between mb-5">
+              <h3 className="text-xl font-bold text-gray-900">Contact Administrator</h3>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-5 text-sm text-gray-700 leading-relaxed">
+              Password resets are handled by your system administrator. Please contact them with your username
+              and they will reset your password from the <span className="font-semibold">Users</span> section.
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2.5 mb-5">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Your username</p>
+              <p className="font-semibold text-gray-900">{username}</p>
+
+              {contactInfo && (contactInfo.phone || contactInfo.email) && (
+                <>
+                  <div className="border-t border-gray-200 pt-2.5">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                      {contactInfo.businessName || 'Admin'} Contact
+                    </p>
+                    {contactInfo.phone && (
+                      <div className="flex items-center gap-2 text-sm text-gray-700">
+                        <span className="text-gray-400">📞</span>
+                        <a href={`tel:${contactInfo.phone}`} className="text-blue-600 hover:underline">{contactInfo.phone}</a>
+                      </div>
+                    )}
+                    {contactInfo.email && (
+                      <div className="flex items-center gap-2 text-sm text-gray-700 mt-1">
+                        <span className="text-gray-400">✉</span>
+                        <a href={`mailto:${contactInfo.email}`} className="text-blue-600 hover:underline">{contactInfo.email}</a>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <button onClick={onClose} className="w-full btn-primary py-2.5 text-sm font-semibold">
+              Back to Sign In
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
