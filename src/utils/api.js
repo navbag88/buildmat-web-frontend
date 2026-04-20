@@ -121,6 +121,31 @@ export const settingsApi = {
   getLogo:    () => api.get('/settings/logo', { responseType: 'blob' }),
 }
 
+// ── Suppliers ─────────────────────────────────────────────────────────────────
+export const suppliersApi = {
+  getAll:      (q) => api.get('/suppliers', { params: q ? { q } : {} }),
+  getById:     (id) => api.get(`/suppliers/${id}`),
+  create:      (data) => api.post('/suppliers', data),
+  update:      (id, data) => api.put(`/suppliers/${id}`, data),
+  delete:      (id) => api.delete(`/suppliers/${id}`),
+  exportExcel: () => api.get('/suppliers/export/excel', { responseType: 'blob' }),
+  exportPdf:   () => api.get('/suppliers/export/pdf', { responseType: 'blob' }),
+}
+
+// ── Purchases ─────────────────────────────────────────────────────────────────
+export const purchasesApi = {
+  getAll:        (q) => api.get('/purchases', { params: q ? { q } : {} }),
+  getById:       (id) => api.get(`/purchases/${id}`),
+  create:        (data) => api.post('/purchases', data),
+  update:        (id, data) => api.put(`/purchases/${id}`, data),
+  delete:        (id) => api.delete(`/purchases/${id}`),
+  getPayments:   (id) => api.get(`/purchases/${id}/payments`),
+  addPayment:    (id, data) => api.post(`/purchases/${id}/payments`, data),
+  deletePayment: (paymentId) => api.delete(`/purchases/payments/${paymentId}`),
+  exportExcel:   () => api.get('/purchases/export/excel', { responseType: 'blob' }),
+  exportPdf:     () => api.get('/purchases/export/pdf', { responseType: 'blob' }),
+}
+
 // ── Users ──────────────────────────────────────────────────────────────────────
 export const usersApi = {
   getAll:         () => api.get('/users'),

@@ -9,6 +9,8 @@ import Customers from './pages/CustomersPage'
 import Products from './pages/ProductsPage'
 import Invoices from './pages/InvoicesPage'
 import Payments from './pages/PaymentsPage'
+import Suppliers from './pages/SuppliersPage'
+import Purchases from './pages/PurchasesPage'
 import Reports from './pages/ReportsPage'
 import Users from './pages/UsersPage'
 import Settings from './pages/SettingsPage'
@@ -49,6 +51,8 @@ export default function App() {
         <Route path="invoices/new"       element={<Invoices />} />
         <Route path="invoices/:id/edit"  element={<Invoices />} />
         <Route path="payments"   element={<Payments />} />
+        <Route path="suppliers"  element={<Suppliers />} />
+        <Route path="purchases"  element={<Purchases />} />
         <Route path="reports"    element={<Reports />} />
         <Route path="users"      element={<AdminRoute><Users /></AdminRoute>} />
         <Route path="settings"   element={<AdminRoute><Settings /></AdminRoute>} />

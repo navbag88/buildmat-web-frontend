@@ -3,15 +3,18 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { getUser, isAdmin, isSuperAdmin, logout } from '../utils/auth'
 import {
   LayoutDashboard, Users, Package, FileText, CreditCard,
-  BarChart3, Shield, LogOut, Menu, X, ChevronDown, Building2, Settings
+  BarChart3, Shield, LogOut, Menu, X, ChevronDown, Building2, Settings,
+  Truck, ShoppingCart
 } from 'lucide-react'
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/invoices',  icon: FileText,        label: 'Invoices' },
+  { to: '/payments',  icon: CreditCard,      label: 'Payments' },
+  { to: '/purchases', icon: ShoppingCart,    label: 'Purchases' },
+  { to: '/suppliers', icon: Truck,           label: 'Suppliers' },
   { to: '/customers', icon: Users,           label: 'Customers' },
   { to: '/products',  icon: Package,         label: 'Products' },
-  { to: '/payments',  icon: CreditCard,      label: 'Payments' },
   { to: '/reports',   icon: BarChart3,       label: 'MIS Reports' },
 ]
 
